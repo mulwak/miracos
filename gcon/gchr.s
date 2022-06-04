@@ -100,6 +100,9 @@ DRAW_LINE_RAW:
   ; 行を描画する
   ; TRAM_VEC16を上位だけ設定しておき、そのなかのインデックスもYで持っておく
   ; 連続実行すると次の行を描画できる
+  BBS4  ZP_CON_DEV_CFG,@SKP_RTS
+  RTS
+@SKP_RTS:
   TYA                       ; インデックスをAに
   AND #%11100000            ; 行として意味のある部分を抽出
   TAX                       ; しばらく使わないXに保存

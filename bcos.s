@@ -32,6 +32,7 @@ FALSE = 0
   UART_OUT  = %00000010
   PS2       = %00000100
   GCON      = %00001000
+  GCON_SCRL = %00010000
 .ENDPROC
 
 ; -------------------------------------------------------------------
@@ -320,11 +321,18 @@ END:
 FUNC_CON_OUT_STR:
   STA ZR5
   STY ZR5+1                   ; ZR5を文字列インデックスに
+  RMB4 ZP_CON_DEV_CFG         ; 一時的にGCONを切る
   LDY #$FF
 @LOOP:
   INY
+  INY
   LDA (ZR5),Y                 ; 文字をロード
-  BEQ END                     ; ヌルなら終わり
+  BNE @SKP_ACTIVE
+  SMB4 ZP_CON_DEV_CFG         ; 一時的なGCON切りを解除
+@SKP_ACTIVE:
+  DEY
+  LDA (ZR5),Y                 ; 文字をロード
+  BEQ @END                    ; ヌルなら終わり
   PHY
   JSR FUNC_CON_OUT_CHR        ; 文字を表示（独自にした方が効率的かも）
   PLY
@@ -332,6 +340,8 @@ FUNC_CON_OUT_STR:
   BNE @LOOP                   ; #$FFに到達しないまではそのままループ
   INC ZR5+1                   ; 次のページへ
   BRA @LOOP                   ; ループ
+@END:
+  RTS
 
 ; -------------------------------------------------------------------
 ; BCOS 7               コンソールバッファ行入力
